@@ -18,7 +18,7 @@
 			.page-navigation a {
   			  margin: 0 2px;
 			  display: inline-block;
-			  padding: 3px 5px;
+			  padding: 5px 5px;
 			  color: #ffffff;
 			  background-color: #70b7ec;
 			  border-radius: 5px;
@@ -140,7 +140,7 @@
 		<script>
 			
 			$(document).ready(function() {
-				$("table").tablesorter();
+				$("#my-table").tablesorter();
 
 				$('#my-table').paginate({ 
 				  limit: 20, // 10 elements per page
