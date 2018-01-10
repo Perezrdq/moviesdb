@@ -93,7 +93,7 @@
 						<cfloop query="MoviesQry">
 								<tr>
 									<td>#MoviesQry.currentRow#</td>	
-									<td>#MoviesQry.id#</td>			
+									<td class="idmovie">#MoviesQry.id#</td>			
 									<td>#MoviesQry.title#</td>		
 									<td>#dateformat(MoviesQry.release_date,"short")#</td>		
 									<td>#MoviesQry.vote_count#</td>		
@@ -115,30 +115,27 @@
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
-						<h4 class="modal-title" id="myModalLabel">The Movie Detail</h4>
+						<h4 class="modal-title" id="myModalLabel"></h4>
 					</div>
 					<div class="modal-body">
-						<cfoutput>
-							<div class="container-fluid">		
-							<table class="table table-bordered">
-								<thead >
-									<tr>
-										<th>Image</th>
-										<th>Popularity</th>
-										<th>Overview</th>		
-									</tr>
-								</thead>
-								<tbody id="my-body"> 			
-								</tbody>
-							</table>
-							</div>	
-						</cfoutput>		
+						<div class="container-fluid">		
+						<table class="table table-bordered">
+							<thead id=my-thead>
+								<tr>
+									<th>Image</th>
+									<th>Popularity</th>
+									<th>Overview</th>		
+								</tr>
+							</thead>
+							<tbody id="my-body"> 			
+							</tbody>
+						</table>
+						</div>	
 					</div>
 				</div>
 			</div>
 		</div>
 		<script>
-			
 			$(document).ready(function() {
 				$("#my-table").tablesorter();
 
@@ -156,30 +153,51 @@
 				  optional: true // Always show the navigation menu
 				});
 
-				$("tr").click(function () {
-					// get rows
-					var rowstbl =  $(this).find("td");
-					// get id movie
-
-					var idmovie = $($(rowstbl).get(1)).text();
+				$("td.idmovie").click(function () {
+					var idmovie = $(this).text();
 					var $result = $("#my-body");
 
-		            $.ajax({
-		            	url: "http://projects.local/moviesdb/detailquery.cfm", 
-		            	method: "GET", 
-		            	data: {id: idmovie}, 
-		            	success: function(resp) {
-		            		//$("#my-body").append(resp);
-		            		//$(resp).appendTo("#my-body");
-		            		$result.html(resp);
-		            	},
-		            	error: function(a, b, c) {
-		            		console.log(a,b,c);
-		            	}
-		        	});
-		 
-		        	$('#myModal').fadeIn("slow").modal({show:true});
-				});		
+		 			$.ajax({
+	    				url: "http://projects.local/moviesdb/detailquery.cfc",
+	  					   type: "get",
+						   dataType: "json",
+						   data: {
+						   	   method: "getDetail",
+						   	   id: idmovie
+						   }, 
+						   success: function (resp){
+						   	var detail = '<tr>';	
+ 							$.each(resp, function (name, value) {
+ 								if (name !== 'error') {
+	      							if (name === 'title') {
+	      								$("#myModalLabel").text(value);	
+	      							}
+	      							if (name === 'path') {
+	      								detail += '<td><img src="'+value+'"></td>';
+	      							}
+	      							if (name === 'popularity') {
+	      								detail += '<td>'+value+'</td>';
+	      							}
+	      							if (name === 'overview') {
+	      								detail += '<td>'+value+'</td>';
+	      							}
+ 								} else {
+ 									detail = '';
+ 									$("#my-thead").html('');
+ 									detail = '<div class="alert alert-danger" role="alert" align="center">'+value+'</div>';	
+ 								}	
+  							});
+  							detail += '</tr>';
+ 							$result.html(detail);	
+						  },
+						  // this runs if an error
+						    error: function (xhr, textStatus, errorThrown){
+						    // show error
+						    alert(errorThrown);
+						  }
+						});	
+		        	$('#myModal').fadeIn("fast").modal({show:true});
+				});	
 			});	
 		</script> 
 	</body>
